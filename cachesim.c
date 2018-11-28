@@ -7,11 +7,13 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define MEMORY_SIZE 64000000
 
 void read_config(char *file_name);
 void print_config();
+void process_without_cache();
 
 typedef struct settings{
     float clock_rate;
@@ -38,6 +40,8 @@ int main(int argc, char *argv[]) {
         start_of_memory[i] = calloc(settings->block_size, 1);
     }
 
+    process_without_cache();
+
     return 0;
 }
 
@@ -63,4 +67,24 @@ void read_config(char *file_name){
 
     close(fd);
     return;
+}
+
+void process_without_cache(){
+    FILE *fp = fopen("mem_access2.txt", "r");
+    char line[100];
+    int t0;
+    int address;
+    while (fgets(line, 100, fp) != NULL){
+        address = atol(&line[2]);
+        if (line[0] == 'R') {
+            t0 = start_of_memory[address/settings->block_size][address % settings->block_size];
+            if (t0 != 0)
+                printf("@@@@@@@@@@\n----------t0 not 0!---------\n---------t0: %d----------\n@@@@@@@@@@@@@@@@@@\n", t0);
+        }
+        else {
+            t0 = atoi(strrchr(line, ' ') + 1);
+            memcpy(&start_of_memory[address/settings->block_size][address % settings->block_size], &t0, 4);
+        }
+        printf("Line: %s, Address: %d, t0: %d\n", line, address, t0);
+    }
 }
