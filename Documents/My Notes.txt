@@ -1,0 +1,62 @@
+set-associativity 1: need to express up to "1"
+set-associativity 2: need to express up to "2"
+set-associativity 3: need to express up to "3"
+set-associativity n: need to express up to "n"
+
+
+127: 7 bits
+number of bits it takes to express 129: round_down(log2(129)) + 1
+
+
+
+
+log2(126): 6.97     7 bits
+log2(127): 6.99     7 bits
+log2(128): 7        8 bits
+
+if we have x word set, i.e. x bytes, we need 2^(x+1) bits per word to store how many'th they are.
+
+so we need to malloc
+
+round_down(log2(set_associativity)) + 1  
+
+(((int) floor(log2f((float) set_associativity)) + 1) + 7 ) / 8
+
+8 -> 1
+9 -> 2
+
+9 + 7
+
+------------------------
+
+Set 0: Lines 0, 1, 2, 3
+Set 1: Lines 4, 5, 6, 7
+Set 2: Lines 8, 9, 10, 11
+
+Then the start of the set with line 10 = 10 - 2 = 10 - 10 % 4
+
+Address 14
+Line size 4
+0-3
+4-7
+8-11
+12-15
+
+Load word at address 20. Our line size is 8.
+Then it will be in line 20/8= line 3.
+It will be the 20 % 8 / 4 = word 1 in the line.
+
+Block 0: Words 0, 1, 2, 3  (16 bytes)
+Block 1: Words 4(16), 5(20), 6(24), 7(28)  
+
+Then if we have address of word 6 (6*4)
+Then it'll be in block 6*4/16=1.
+
+
+---------------------
+The line size will be 4, 8, 16, 32, .., bytes.
+The number of lines will be 2, 4, 8, 16, ... lines.
+
+Then we can't do shit with 3-set associative. It must be 2-set, or 4-set, or
+8-set. You can't divide 16 lines into 3 sets. So we can just do log2 for
+everything.
