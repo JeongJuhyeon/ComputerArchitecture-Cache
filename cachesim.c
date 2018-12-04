@@ -57,11 +57,14 @@ block *Cache;
 
 int main(int argc, char *argv[]) {
     //TODO: CHANGE THIS TO argv[1] WHEN SUBMITTING
-    read_config("C:\\Users\\jjh-L\\CLionProjects\\ComputerArchitecture-Cache\\cachesim.conf");
+    //read_config("C:\\Users\\jjh-L\\CLionProjects\\ComputerArchitecture-Cache\\cachesim.conf");
+    read_config("cachesim.conf");
     print_config();
 
     allocate_memory();
     process_without_cache();
+
+    ram_access = 0;
 
     allocate_cache();
     process_with_cache();
@@ -96,7 +99,7 @@ void print_results(){
 
 
 void process_with_cache(){
-    FILE *fp = fopen("C:\\Users\\jjh-L\\CLionProjects\\ComputerArchitecture-Cache\\mem_access3.txt", "r");
+    FILE *fp = fopen("mem_access3.txt", "r");
     char char_buf[100];
     int address;
 
@@ -302,7 +305,9 @@ void allocate_cache(){
 }
 
 void process_without_cache(){
-    FILE *fp = fopen("C:\\Users\\jjh-L\\CLionProjects\\ComputerArchitecture-Cache\\mem_access3.txt", "r");
+    FILE *fp = fopen("mem_access3.txt", "r");
+    if (fp == NULL)
+        fp = fopen("C:\\Users\\jjh-L\\CLionProjects\\ComputerArchitecture-Cache\\mem_access3.txt", "r");
     char char_buf[100];
     word t0;
     int address;
