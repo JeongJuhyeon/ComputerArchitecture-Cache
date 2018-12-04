@@ -28,6 +28,7 @@ void read_into_cache_block(int cache_block, int ram_block_number);
 void write_word_to_cache(int address, int block_number, word word);
 void move_to_back_of_queue(int set_number, int block_number);
 int count_bits(int x);
+void print_results();
 
 int ram_access = 0;
 int hits = 0;
@@ -56,24 +57,46 @@ block *Cache;
 
 int main(int argc, char *argv[]) {
     //TODO: CHANGE THIS TO argv[1] WHEN SUBMITTING
-    read_config("cachesim.conf");
+    read_config("C:\\Users\\jjh-L\\CLionProjects\\ComputerArchitecture-Cache\\cachesim.conf");
     print_config();
 
     allocate_memory();
-    //process_without_cache();
+    process_without_cache();
 
     allocate_cache();
     process_with_cache();
 
-
+    print_results();
 
 
     return 0;
 }
 
+void print_results(){
+    // Without cache, 1 memory access per read, 1 memory access per write
+    printf("Average memory access latency without cache: %.1f ns\n", (float) ACCESS_LATENCY / CLOCK_RATE);
+
+    printf("* L1 Cache Contents\n");
+    for (int i = 0; i < CACHE_BLOCKS; i++) {
+        printf("%d: ", i);
+        for (int j = 0; j < BLOCK_WORDS; j++) {
+            printf("%08x ", Cache[i].data[j]);
+        }
+        printf("\n");
+    }
+
+    // TODO printf("\n\nTotal program run time: %.1f seconds");
+    printf("L1 total access: %d\n", hits + misses);
+    printf("L1 total miss count: %d\n", misses);
+    printf("L1 miss rate: %.2f\n", (float) misses / (misses + hits));
+                                                            // ---------Total cycles--------------            /  instructions   /  cycles per ns
+    printf("Average memory access latency: %.2f ns\n", (ram_access * ACCESS_LATENCY +  2.0 * (misses + hits)) / (misses + hits) / CLOCK_RATE);
+
+}
+
 
 void process_with_cache(){
-    FILE *fp = fopen("mem_access3.txt", "r");
+    FILE *fp = fopen("C:\\Users\\jjh-L\\CLionProjects\\ComputerArchitecture-Cache\\mem_access3.txt", "r");
     char char_buf[100];
     int address;
 
@@ -86,7 +109,6 @@ void process_with_cache(){
         else {
             write_word(address, atoi(strrchr(char_buf, ' ') + 1));
         }
-
     }
     printf("Hits: %d, Misses: %d\n", hits, misses);
 }
@@ -280,7 +302,7 @@ void allocate_cache(){
 }
 
 void process_without_cache(){
-    FILE *fp = fopen("mem_access3.txt", "r");
+    FILE *fp = fopen("C:\\Users\\jjh-L\\CLionProjects\\ComputerArchitecture-Cache\\mem_access3.txt", "r");
     char char_buf[100];
     word t0;
     int address;
@@ -298,7 +320,6 @@ void process_without_cache(){
             t0 = atoi(strrchr(char_buf, ' ') + 1);
             memcpy(&Ram[address / BLOCK_BYTES].data[address % BLOCK_BYTES / 4], &t0, 4);
         }
-        printf("block: %d, Address: %d, t0: %d\n", address / BLOCK_BYTES, address, t0);
     }
 }
 
@@ -313,7 +334,7 @@ void print_config(){
 }
 
 void read_config(char *file_name){
-    int fd = open(file_name, O_RDONLY);
+    /*int fd = open(file_name, O_RDONLY);
     char t[100];
     dup2(fd, 0);
 
@@ -321,7 +342,16 @@ void read_config(char *file_name){
     scanf("%s %d", t, &(ACCESS_LATENCY));
     scanf("%s %d", t, &(CACHE_SIZE));
     scanf("%s %d", t, &(BLOCK_BYTES));
-    scanf("%s %d", t, &(BLOCKS_PER_SET));
+    scanf("%s %d", t, &(BLOCKS_PER_SET));*/
+
+    FILE *fp = fopen(file_name, "r");
+    char t[100];
+    fscanf(fp, "%s %f", t, &(CLOCK_RATE));
+    fscanf(fp, "%s %d", t, &(ACCESS_LATENCY));
+    fscanf(fp, "%s %d", t, &(CACHE_SIZE));
+    fscanf(fp, "%s %d", t, &(BLOCK_BYTES));
+    fscanf(fp, "%s %d", t, &(BLOCKS_PER_SET));
+
 
     CACHE_BLOCKS = CACHE_SIZE/BLOCK_BYTES;
     CACHE_SETS = CACHE_BLOCKS / BLOCKS_PER_SET;
@@ -330,7 +360,7 @@ void read_config(char *file_name){
     OFFSET_BITS = count_bits(BLOCK_BYTES - 1);
     BLOCK_WORDS = BLOCK_BYTES / 4;
 
-    close(fd);
+    fclose(fp);
 }
 
 int count_bits(int x){
